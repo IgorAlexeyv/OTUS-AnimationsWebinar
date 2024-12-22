@@ -1,12 +1,13 @@
 package com.otus.animations
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.transition.ChangeBounds
+import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnticipateOvershootInterpolator
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.otus.animations.databinding.FragmentSecondBinding
 
@@ -14,6 +15,8 @@ class SecondFragment : Fragment() {
 
     private var _binding: FragmentSecondBinding? = null
     private val binding get() = _binding!!
+
+    private var show = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -24,22 +27,35 @@ class SecondFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        with(binding.circle) { setOnClickListener { startAnimation() } }
+        with(binding.backgroundImage) { setOnClickListener { if (show) hideComponents() else showComponents() } }
     }
 
-    private fun startAnimation() {
-        with(binding.circle) {
-            val translationX = ObjectAnimator.ofFloat(this, "translationX", 0f, this.width.toFloat() / 2, 0f)
-            val scaleUpX = ObjectAnimator.ofFloat(this, "scaleX", 1f, 0.5f, 1f, 1f, 1.2f, 1f)
-            val scaleUpY = ObjectAnimator.ofFloat(this, "scaleY", 1f, 0.5f, 1f, 1f, 1.2f, 1f)
-            val fadeOut = ObjectAnimator.ofFloat(this, "alpha", 1f, 0f, 1f, 1f, 1f, 1f)
+    private fun showComponents() {
+        show = true
 
-            AnimatorSet().apply {
-                duration = 2000
-                interpolator = AccelerateDecelerateInterpolator()
-                playTogether(translationX, scaleUpX, scaleUpY, fadeOut)
-            }.start()
-        }
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(requireContext(), R.layout.fragment_second_end)
+
+        val transition = ChangeBounds()
+        transition.interpolator = AnticipateOvershootInterpolator(1.0f)
+        transition.duration = 1200
+
+        TransitionManager.beginDelayedTransition(binding.constraintContainer, transition)
+        constraintSet.applyTo(binding.constraintContainer)
+    }
+
+    private fun hideComponents() {
+        show = false
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(requireContext(), R.layout.fragment_second)
+
+        val transition = ChangeBounds()
+        transition.interpolator = AnticipateOvershootInterpolator(1.0f)
+        transition.duration = 1200
+
+        TransitionManager.beginDelayedTransition(binding.constraintContainer, transition)
+        constraintSet.applyTo(binding.constraintContainer)
     }
 
     override fun onDestroyView() {
