@@ -43,5 +43,5 @@ class MyCircle @JvmOverloads constructor(
             }
     }
 
-    data class CircleParameters(var radius: Float = 0f, var alpha: Int = 255)
+    data class CircleParameters(var radius: Float = 200f, var alpha: Int = 255)
 }
